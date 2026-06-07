@@ -1,3 +1,4 @@
+import 'package:path/path.dart' as p;
 import 'torrent_database.dart';
 import 'torrent_models.dart';
 
@@ -24,7 +25,23 @@ class TorrentRepository {
     await _database.deleteTorrent(id);
   }
 
-  Future<void> updateQueueOrder(List<String> orderedIds) async {
-    await _database.updateQueueOrder(orderedIds);
+  Future<void> importFromDirectory(String directoryPath) async {
+    // T036 implementation
+    // In a real Android environment, this would use a DirectoryStream 
+    // or a FileWatcher to find .torrent files and add them.
+    final dir = p.Directory(directoryPath);
+    if (await dir.exists()) {
+      final files = dir.listSync().where((f) => f.path.endsWith('.torrent')).toList();
+      for (var file in files) {
+        // Mocking the import of torrent files
+        final torrent = TorrentTask(
+          id: 'imported-${DateTime.now().millisecondsSinceEpoch}',
+          name: p.basename(file.path),
+          status: TorrentStatus.queued,
+          progress: 0.0,
+        );
+        await saveTorrent(torrent);
+      }
+    }
   }
 }

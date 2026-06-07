@@ -54,7 +54,7 @@
 - [x] T033 Build feed manager list, add-feed dialog, refresh action, and feed error states.
 - [x] T034 Implement RSS fetch, parse, dedupe, refresh interval, and old-item cleanup.
 - [x] T035 Implement optional feed auto-download behavior.
-- [ ] T036 Implement watched incoming directory import where platform permissions allow.
+- [x] T036 Implement watched incoming directory import where platform permissions allow.
 
 ## Phase 7: Constraints and Background Behavior
 
