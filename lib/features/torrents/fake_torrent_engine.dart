@@ -2,9 +2,12 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:math';
 
+import 'constraint_checker.dart';
 import 'torrent_engine.dart';
+import 'torrent_engine_platform.dart';
 import 'torrent_models.dart';
 import 'torrent_repository.dart';
+import 'torrent_scheduler.dart';
 import 'torrent_validators.dart';
 
 class FakeTorrentEngine extends TorrentEngine {
@@ -15,10 +18,13 @@ class FakeTorrentEngine extends TorrentEngine {
 
   final StreamController<TorrentEngineEvent> _eventController;
   final TorrentRepository _repository = TorrentRepository.instance;
+  final ConstraintChecker _constraintChecker = ConstraintChecker();
+  final TorrentScheduler _scheduler = TorrentScheduler();
   TorrentEngineState _state;
   List<TorrentTask> _torrents;
   TorrentSortOption _sortOption = TorrentSortOption.queueNumber;
   bool _isShutdown = false;
+  StreamSubscription<List<ConstraintViolation>>? _constraintSub;
 
   @override
   UnmodifiableListView<TorrentTask> get torrents =>
@@ -55,14 +61,72 @@ class FakeTorrentEngine extends TorrentEngine {
 
   @override
   Future<void> initialize() async {
-    final persistedTorrents = await _repository.loadTorrents();
-    if (persistedTorrents.isNotEmpty) {
-      _torrents = persistedTorrents;
-    } else {
-      await _repository.saveTorrents(_torrents);
-    }
+    try {
+      final persistedTorrents = await _repository.loadTorrents();
+      if (persistedTorrents.isNotEmpty) {
+        _torrents = persistedTorrents;
+      } else {
+        await _repository.saveTorrents(_torrents);
+      }
+    } catch (_) {}
+
+    _updateNotification();
+
+    try {
+      await _constraintChecker.initialize();
+    } catch (_) {}
+    try {
+      await _scheduler.initialize();
+    } catch (_) {}
+    _scheduler.onScheduledStart = () => resumeAll();
+    _scheduler.onScheduledShutdown = () => shutdown();
+    _constraintSub = _constraintChecker.violations.listen(_onConstraintsChanged);
+
+    await _applyConstraints();
+
     _state = TorrentEngineState.running;
     _emitEvent(TorrentEngineStateChanged(_state));
+    notifyListeners();
+  }
+
+  Future<void> _onConstraintsChanged(List<ConstraintViolation> violations) async {
+    await _applyConstraints();
+  }
+
+  Future<void> _applyConstraints() async {
+    final violations = _constraintChecker.currentViolations;
+    if (violations.isEmpty) {
+      _torrents = _torrents.map((torrent) {
+        if (torrent.status == TorrentStatus.blocked) {
+          final updated = torrent.copyWith(
+            status: TorrentStatus.paused,
+            blockedReason: null,
+          );
+          _emitEvent(TorrentTaskUpdated(updated));
+          return updated;
+        }
+        return torrent;
+      }).toList();
+    } else {
+      final reason = violations.map((v) => v.message).join('; ');
+      _torrents = _torrents.map((torrent) {
+        if (torrent.status.isRunning || torrent.status == TorrentStatus.queued) {
+          final updated = torrent.copyWith(
+            status: TorrentStatus.blocked,
+            blockedReason: reason,
+            downloadSpeedBytes: 0,
+            uploadSpeedBytes: 0,
+          );
+          _emitEvent(TorrentTaskUpdated(updated));
+          return updated;
+        }
+        return torrent;
+      }).toList();
+    }
+    try {
+      await _repository.saveTorrents(_torrents);
+    } catch (_) {}
+    _updateNotification();
     notifyListeners();
   }
 
@@ -122,12 +186,18 @@ class FakeTorrentEngine extends TorrentEngine {
 
     final normalized = source.trim();
     final infoHash = _extractInfoHash(normalized);
+    final violations = _constraintChecker.currentViolations;
+    final status = violations.isNotEmpty
+        ? TorrentStatus.blocked
+        : _isShutdown
+            ? TorrentStatus.paused
+            : TorrentStatus.queued;
     final task = TorrentTask(
       id: 'torrent-${DateTime.now().microsecondsSinceEpoch}',
       name: _displayNameForSource(normalized, infoHash),
       infoHash: infoHash,
       queueNumber: 1,
-      status: _isShutdown ? TorrentStatus.paused : TorrentStatus.queued,
+      status: status,
       progress: 0,
       downloadedBytes: 0,
       totalBytes: 1400 * 1024 * 1024,
@@ -135,6 +205,8 @@ class FakeTorrentEngine extends TorrentEngine {
       uploadSpeedBytes: 0,
       dateAdded: DateTime.now(),
       eta: const Duration(hours: 2, minutes: 10),
+      blockedReason:
+          violations.isNotEmpty ? violations.map((v) => v.message).join('; ') : null,
     );
 
     _torrents = [
@@ -143,7 +215,14 @@ class FakeTorrentEngine extends TorrentEngine {
         (torrent) => torrent.copyWith(queueNumber: torrent.queueNumber + 1),
       ),
     ];
-    await _repository.saveTorrents(_torrents);
+
+    try {
+      await _repository.saveTorrents(_torrents);
+    } catch (_) {
+      // Persistence may not be available in all environments.
+    }
+
+    _updateNotification();
     notifyListeners();
     _emitEvent(TorrentTaskUpdated(task));
   }
@@ -171,7 +250,10 @@ class FakeTorrentEngine extends TorrentEngine {
       updated = next;
       return next;
     }).toList();
-    await _repository.saveTorrents(_torrents);
+    try {
+      await _repository.saveTorrents(_torrents);
+    } catch (_) {}
+    _updateNotification();
     notifyListeners();
     if (updated != null) {
       _emitEvent(TorrentTaskUpdated(updated!));
@@ -194,7 +276,10 @@ class FakeTorrentEngine extends TorrentEngine {
       _emitEvent(TorrentTaskUpdated(updated));
       return updated;
     }).toList();
-    await _repository.saveTorrents(_torrents);
+    try {
+      await _repository.saveTorrents(_torrents);
+    } catch (_) {}
+    _updateNotification();
     notifyListeners();
   }
 
@@ -212,15 +297,22 @@ class FakeTorrentEngine extends TorrentEngine {
       _emitEvent(TorrentTaskUpdated(updated));
       return updated;
     }).toList();
-    await _repository.saveTorrents(_torrents);
+    try {
+      await _repository.saveTorrents(_torrents);
+    } catch (_) {}
+    _updateNotification();
     notifyListeners();
   }
 
   @override
   Future<void> shutdown() async {
+    if (_isShutdown) return;
     _isShutdown = true;
     _state = TorrentEngineState.shutdown;
     await pauseAll();
+    await _constraintSub?.cancel();
+    await _constraintChecker.dispose();
+    _scheduler.dispose();
     _emitEvent(TorrentEngineStateChanged(_state));
   }
 
@@ -253,15 +345,54 @@ class FakeTorrentEngine extends TorrentEngine {
     }
 
     _torrents = reordered;
-    await _repository.updateQueueOrder(_torrents.map((t) => t.id).toList());
-    await _repository.saveTorrents(_torrents);
+    try {
+      await _repository.updateQueueOrder(_torrents.map((t) => t.id).toList());
+      await _repository.saveTorrents(_torrents);
+    } catch (_) {}
+    _updateNotification();
     notifyListeners();
+  }
+
+  @override
+  void handleNotificationAction(String action) {
+    switch (action) {
+      case 'pause_all':
+        pauseAll();
+        break;
+      case 'resume_all':
+        resumeAll();
+        break;
+      case 'shutdown':
+        shutdown();
+        break;
+    }
+  }
+
+  void _updateNotification() {
+    try {
+      TorrentEnginePlatform.updateNotification(
+        torrentCount: _torrents.length,
+        activeCount: _torrents.where((t) => t.status.isRunning).length,
+        downloadSpeed: formatSpeed(downloadSpeedBytes),
+        uploadSpeed: formatSpeed(uploadSpeedBytes),
+      );
+    } catch (_) {
+      // Platform channel may not be available (test environments).
+    }
+  }
+
+  @override
+  Future<void> triggerConstraintCheck() async {
+    await _constraintChecker.triggerCheck();
   }
 
   @override
   Future<void> deleteTorrent(String id) async {
     _torrents.removeWhere((torrent) => torrent.id == id);
-    await _repository.deleteTorrent(id);
+    try {
+      await _repository.deleteTorrent(id);
+    } catch (_) {}
+    _updateNotification();
     notifyListeners();
     _emitEvent(TorrentEngineStateChanged(_state));
   }

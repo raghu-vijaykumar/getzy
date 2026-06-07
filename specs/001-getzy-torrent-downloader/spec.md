@@ -92,6 +92,11 @@ As an Android user, I want Getzy to add, manage, search, sort, and monitor torre
 - **SC-004**: Widget tests cover all primary screens and dialogs from the screenshot set.
 - **SC-005**: Engine adapter contract tests prove UI logic works with mocked torrent events before native engine integration.
 
+## Checkpoint Workflow
+
+> Implementation follows the tasks in `tasks.md`. At each phase boundary, commit and push progress:
+> `git add . && git commit -m "[Checkpoint] <phase description>" && git push`
+
 ## Out of Scope for v1
 
 - Built-in torrent index search across public piracy sites.

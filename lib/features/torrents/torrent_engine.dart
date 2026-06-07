@@ -35,6 +35,8 @@ abstract class TorrentEngine extends ChangeNotifier {
   Future<void> updateSort(TorrentSortOption option);
   Future<void> reorderQueue(List<String> orderedTorrentIds);
   Future<void> deleteTorrent(String id);
+  Future<void> triggerConstraintCheck();
+  void handleNotificationAction(String action);
 }
 
 abstract class TorrentEngineEvent {}

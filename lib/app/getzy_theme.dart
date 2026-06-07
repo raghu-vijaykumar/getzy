@@ -12,9 +12,21 @@ class GetzyColors {
   static const action = Color(0xFF008DAA);
   static const fab = Color(0xFFA9004C);
   static const warning = Color(0xFFFFD54F);
+
+  static const backgroundLight = Color(0xFFF5F7F8);
+  static const surfaceLight = Color(0xFFFFFFFF);
+  static const elevatedLight = Color(0xFFF0F2F3);
+  static const dividerLight = Color(0xFFDDE1E4);
+  static const textPrimaryLight = Color(0xFF1A1C1E);
+  static const textSecondaryLight = Color(0xFF5D666A);
+  static const textDisabledLight = Color(0xFF9EA8AD);
+  static const accentLight = Color(0xFF008DAA);
+  static const actionLight = Color(0xFF006B82);
+  static const fabLight = Color(0xFFC2185B);
+  static const warningLight = Color(0xFFE65100);
 }
 
-ThemeData buildGetzyTheme() {
+ThemeData buildDarkTheme() {
   final colorScheme = ColorScheme.fromSeed(
     seedColor: GetzyColors.accent,
     brightness: Brightness.dark,
@@ -71,6 +83,70 @@ ThemeData buildGetzyTheme() {
       indicatorColor: GetzyColors.accent,
       labelColor: GetzyColors.textPrimary,
       unselectedLabelColor: GetzyColors.textSecondary,
+      labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+      unselectedLabelStyle:
+          TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+    ),
+  );
+}
+
+ThemeData buildLightTheme() {
+  final colorScheme = ColorScheme.fromSeed(
+    seedColor: GetzyColors.accentLight,
+    brightness: Brightness.light,
+    surface: GetzyColors.surfaceLight,
+  );
+
+  return ThemeData(
+    useMaterial3: true,
+    brightness: Brightness.light,
+    scaffoldBackgroundColor: GetzyColors.backgroundLight,
+    colorScheme: colorScheme.copyWith(
+      primary: GetzyColors.accentLight,
+      secondary: GetzyColors.fabLight,
+      surface: GetzyColors.surfaceLight,
+    ),
+    appBarTheme: const AppBarTheme(
+      elevation: 0,
+      centerTitle: false,
+      backgroundColor: GetzyColors.backgroundLight,
+      foregroundColor: GetzyColors.textPrimaryLight,
+      titleTextStyle: TextStyle(fontSize: 28, color: GetzyColors.textPrimaryLight),
+    ),
+    dialogTheme: DialogTheme(
+      backgroundColor: GetzyColors.surfaceLight,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
+    ),
+    dividerTheme: const DividerThemeData(
+      color: GetzyColors.dividerLight,
+      thickness: 1,
+      space: 1,
+    ),
+    floatingActionButtonTheme: const FloatingActionButtonThemeData(
+      backgroundColor: GetzyColors.fabLight,
+      foregroundColor: Colors.white,
+      extendedTextStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+    ),
+    inputDecorationTheme: const InputDecorationTheme(
+      filled: true,
+      fillColor: GetzyColors.elevatedLight,
+      focusedBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: GetzyColors.accentLight, width: 2),
+      ),
+      enabledBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: GetzyColors.textSecondaryLight),
+      ),
+    ),
+    listTileTheme: const ListTileThemeData(
+      iconColor: GetzyColors.textSecondaryLight,
+      textColor: GetzyColors.textPrimaryLight,
+      subtitleTextStyle: TextStyle(color: GetzyColors.textSecondaryLight),
+    ),
+    tabBarTheme: const TabBarTheme(
+      dividerColor: GetzyColors.dividerLight,
+      indicatorColor: GetzyColors.accentLight,
+      labelColor: GetzyColors.textPrimaryLight,
+      unselectedLabelColor: GetzyColors.textSecondaryLight,
       labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
       unselectedLabelStyle:
           TextStyle(fontSize: 16, fontWeight: FontWeight.w800),

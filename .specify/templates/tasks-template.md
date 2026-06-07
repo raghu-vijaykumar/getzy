@@ -70,7 +70,9 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T008 Configure error handling and logging infrastructure
 - [ ] T009 Setup environment configuration management
 
-**Checkpoint**: Foundation ready - user story implementation can now begin in parallel
+**Checkpoint**: Foundation ready — commit and push this checkpoint before starting user stories
+
+> `/speckit.git.commit` and then `git push`
 
 ---
 
@@ -96,7 +98,9 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T016 [US1] Add validation and error handling
 - [ ] T017 [US1] Add logging for user story 1 operations
 
-**Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
+**Checkpoint**: User Story 1 complete — commit and push before starting User Story 2
+
+> `git add . && git commit -m "[Checkpoint] Complete User Story 1" && git push`
 
 ---
 
@@ -118,7 +122,9 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T022 [US2] Implement [endpoint/feature] in src/[location]/[file].py
 - [ ] T023 [US2] Integrate with User Story 1 components (if needed)
 
-**Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
+**Checkpoint**: User Story 2 complete — commit and push before starting User Story 3
+
+> `git add . && git commit -m "[Checkpoint] Complete User Story 2" && git push`
 
 ---
 
@@ -139,7 +145,9 @@ Examples of foundational tasks (adjust based on your project):
 - [ ] T027 [US3] Implement [Service] in src/services/[service].py
 - [ ] T028 [US3] Implement [endpoint/feature] in src/[location]/[file].py
 
-**Checkpoint**: All user stories should now be independently functional
+**Checkpoint**: All user stories complete — commit and push before polish phase
+
+> `git add . && git commit -m "[Checkpoint] Complete all user stories" && git push`
 
 ---
 
@@ -247,6 +255,6 @@ With multiple developers:
 - [Story] label maps task to specific user story for traceability
 - Each user story should be independently completable and testable
 - Verify tests fail before implementing
-- Commit after each task or logical group
+- **Commit and push after each task or logical group** — use the auto-commit hooks or run `git add . && git commit -m "[Checkpoint] <description>" && git push`
 - Stop at any checkpoint to validate story independently
 - Avoid: vague tasks, same file conflicts, cross-story dependencies that break independence

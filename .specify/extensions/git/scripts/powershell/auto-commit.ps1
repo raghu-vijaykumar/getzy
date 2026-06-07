@@ -54,6 +54,7 @@ if (-not $isRepo) {
 # Read per-command config from git-config.yml
 $configFile = Join-Path $repoRoot ".specify/extensions/git/git-config.yml"
 $enabled = $false
+$pushEnabled = $false
 $commitMsg = ""
 
 if (Test-Path $configFile) {
@@ -82,6 +83,12 @@ if (Test-Path $configFile) {
                 if ($val -eq 'true') { $defaultEnabled = $true }
             }
 
+            # Check push_default key
+            if ($line -match '^\s+push_default:\s*(.+)$') {
+                $val = $matches[1].Trim().ToLower()
+                if ($val -eq 'true') { $pushEnabled = $true }
+            }
+
             # Detect our event subsection
             if ($line -match "^\s+${EventName}:") {
                 $inEvent = $true
@@ -102,6 +109,11 @@ if (Test-Path $configFile) {
                 }
                 if ($line -match '\s+message:\s*(.+)$') {
                     $commitMsg = $matches[1].Trim() -replace '^["'']' -replace '["'']$'
+                }
+                if ($line -match '\s+push:\s*(.+)$') {
+                    $val = $matches[1].Trim().ToLower()
+                    if ($val -eq 'true') { $pushEnabled = $true }
+                    if ($val -eq 'false') { $pushEnabled = $false }
                 }
             }
         }
@@ -167,3 +179,22 @@ try {
 }
 
 Write-Host "[OK] Changes committed $phase $commandName"
+
+# Push if enabled
+if ($pushEnabled) {
+    Write-Host "[specify] Pushing to remote..." -ForegroundColor DarkGray
+    $savedEAP = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $out = git push 2>&1 | Out-String
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning "[specify] Warning: git push failed (remote may not be configured or accessible): $out"
+        } else {
+            Write-Host "[OK] Changes pushed to remote"
+        }
+    } catch {
+        Write-Warning "[specify] Warning: git push failed: $_"
+    } finally {
+        $ErrorActionPreference = $savedEAP
+    }
+}

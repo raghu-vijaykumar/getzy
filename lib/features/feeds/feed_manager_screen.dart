@@ -26,21 +26,25 @@ class _FeedManagerScreenState extends State<FeedManagerScreen> {
   }
 
   Future<void> _loadFeeds() async {
-    final feeds = await _repository.loadFeeds();
-    setState(() {
-      _feeds = feeds.isEmpty
-          ? [
-              RssFeed(
-                name: 'Linux releases',
-                url: 'https://example.com/linux-release-feed.xml',
-                autoDownload: false,
-                lastRefreshed:
-                    DateTime.now().subtract(const Duration(hours: 5)),
-              ),
-            ]
-          : feeds;
-      _isLoading = false;
-    });
+    try {
+      final feeds = await _repository.loadFeeds();
+      setState(() {
+        _feeds = feeds.isEmpty
+            ? [
+                RssFeed(
+                  name: 'Linux releases',
+                  url: 'https://example.com/linux-release-feed.xml',
+                  autoDownload: false,
+                  lastRefreshed:
+                      DateTime.now().subtract(const Duration(hours: 5)),
+                ),
+              ]
+            : feeds;
+        _isLoading = false;
+      });
+    } catch (_) {
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _refreshFeeds() async {
@@ -61,10 +65,12 @@ class _FeedManagerScreenState extends State<FeedManagerScreen> {
 
   Future<void> _removeFeed(int index) async {
     final removed = _feeds[index];
-    await _repository.removeFeed(removed.url);
     setState(() {
       _feeds.removeAt(index);
     });
+    try {
+      await _repository.removeFeed(removed.url);
+    } catch (_) {}
     _showSnackBar('Removed ${removed.name}');
   }
 
@@ -145,8 +151,10 @@ class _FeedManagerScreenState extends State<FeedManagerScreen> {
     );
 
     if (feed != null) {
-      await _repository.addFeed(feed);
       setState(() => _feeds.add(feed));
+      try {
+        await _repository.addFeed(feed);
+      } catch (_) {}
     }
   }
 

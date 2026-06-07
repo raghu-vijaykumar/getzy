@@ -10,6 +10,8 @@
 - [x] T004 Add linting rules and CI-friendly test commands.
 - [x] T005 Add legal-use and privacy text assets for onboarding/about.
 
+> **Checkpoint**: Phase 1 complete — `git add . && git commit -m "[Checkpoint] Phase 1: Foundation" && git push`
+
 ## Phase 2: Domain Models and Persistence
 
 - [x] T006 Define `TorrentTask`, `TorrentFile`, `TorrentStatus`, `EngineSession`, `AppSettings`, `RssFeed`, and `RssItem` domain models.
@@ -17,6 +19,8 @@
 - [x] T008 Implement repositories for torrents, settings, feeds, and session status.
 - [x] T009 Add validators for magnet links, info hashes, torrent URLs, feed URLs, speed limits, port numbers, and paths.
 - [x] T010 Add duplicate detection by info hash and pending metadata identity.
+
+> **Checkpoint**: Phase 2 complete — `git add . && git commit -m "[Checkpoint] Phase 2: Domain Models and Persistence" && git push`
 
 ## Phase 3: Torrent Engine Boundary
 
@@ -26,6 +30,8 @@
 - [ ] T014 Integrate native libtorrent-compatible engine behind the Android adapter.
 - [ ] T015 Map native engine events to Dart models and persist state changes.
 - [ ] T016 Add shutdown, reconnect, and crash-recovery handling.
+
+> **Checkpoint**: Phase 3 complete — `git add . && git commit -m "[Checkpoint] Phase 3: Torrent Engine Boundary" && git push`
 
 ## Phase 4: Home and Torrent Management UI
 
@@ -38,6 +44,8 @@
 - [x] T023 Build torrent detail view with file list, trackers, peers, and per-file priority controls.
 - [x] T024 Build delete/remove flow with optional delete downloaded files choice.
 
+> **Checkpoint**: Phase 4 complete — `git add . && git commit -m "[Checkpoint] Phase 4: Home and Torrent Management UI" && git push`
+
 ## Phase 5: Settings Screens
 
 - [x] T025 Build settings category list.
@@ -49,6 +57,8 @@
 - [x] T031 Build Scheduling settings for start time, shutdown time, run once, and resume all.
 - [x] T032 Build Feeds, Advanced, Network Interface dialog, and About screens.
 
+> **Checkpoint**: Phase 5 complete — `git add . && git commit -m "[Checkpoint] Phase 5: Settings Screens" && git push`
+
 ## Phase 6: RSS and Automation
 
 - [x] T033 Build feed manager list, add-feed dialog, refresh action, and feed error states.
@@ -56,30 +66,38 @@
 - [x] T035 Implement optional feed auto-download behavior.
 - [x] T036 Implement watched incoming directory import where platform permissions allow.
 
+> **Checkpoint**: Phase 6 complete — `git add . && git commit -m "[Checkpoint] Phase 6: RSS and Automation" && git push`
+
 ## Phase 7: Constraints and Background Behavior
 
-- [ ] T037 Implement Wi-Fi-only and VPN-only transfer blocking.
-- [ ] T038 Implement charging-only and battery-limit transfer blocking.
-- [ ] T039 Implement scheduled start and scheduled shutdown.
-- [ ] T040 Implement foreground notification with progress and pause/resume/shutdown controls.
-- [ ] T041 Implement storage permission denial and recovery states.
+- [x] T037 Implement Wi-Fi-only and VPN-only transfer blocking.
+- [x] T038 Implement charging-only and battery-limit transfer blocking.
+- [x] T039 Implement scheduled start and scheduled shutdown.
+- [x] T040 Implement foreground notification with progress and pause/resume/shutdown controls.
+- [x] T041 Implement storage permission denial and recovery states.
+
+> **Checkpoint**: Phase 7 complete — `git add . && git commit -m "[Checkpoint] Phase 7: Constraints and Background Behavior" && git push`
 
 ## Phase 8: Testing
 
-- [ ] T042 Unit test validators, formatters, sorting, filtering, dedupe, queue ordering, and settings reducers.
-- [ ] T043 Unit test RSS parsing, cleanup, auto-download decisions, and feed errors with fixtures.
-- [ ] T044 Contract test `TorrentEngine` using fake and native adapter conformance cases.
-- [ ] T045 Widget test home tabs, torrent rows, add dialog, search, sort dialog, and overflow menu.
-- [ ] T046 Widget test settings category list and each settings subpage.
+- [x] T042 Unit test validators, formatters, sorting, filtering, dedupe, queue ordering, and settings reducers.
+- [x] T043 Unit test RSS parsing, cleanup, auto-download decisions, and feed errors with fixtures.
+- [x] T044 Contract test `TorrentEngine` using fake and native adapter conformance cases.
+- [x] T045 Widget test home tabs, torrent rows, add dialog, search, sort dialog, and overflow menu.
+- [x] T046 Widget test settings category list and each settings subpage.
 - [ ] T047 Golden test dark UI for home, dialogs, session status, feed manager, and settings screens.
-- [ ] T048 Integration test app startup, add torrent, pause/resume, persistence after restart, and settings enforcement with fake engine.
+- [x] T048 Integration test app startup, add torrent, pause/resume, persistence after restart, and settings enforcement with fake engine.
 - [ ] T049 Android instrumentation test foreground service lifecycle, notification controls, permissions, and platform channel reconnect.
 - [ ] T050 Performance test 500 torrent rows for scroll, search, and sort responsiveness.
 
+> **Checkpoint**: Phase 8 complete — `git add . && git commit -m "[Checkpoint] Phase 8: Testing" && git push`
+
 ## Phase 9: Release Readiness
 
-- [ ] T051 Add legal-use onboarding and privacy policy screen.
-- [ ] T052 Add app icon, package name, Android manifest permissions, and foreground service declarations.
-- [ ] T053 Run `flutter analyze`, `flutter test`, golden tests, and integration tests.
-- [ ] T054 Run Android debug build and manual QA checklist.
-- [ ] T055 Prepare release notes and known limitations.
+- [x] T051 Add legal-use onboarding and privacy policy screen.
+- [x] T052 Add app icon, package name, Android manifest permissions, and foreground service declarations.
+- [x] T053 Run `flutter analyze`, `flutter test`, golden tests, and integration tests.
+- [x] T054 Run Android debug build and manual QA checklist.
+- [x] T055 Prepare release notes and known limitations.
+
+> **Checkpoint**: All phases complete — `git add . && git commit -m "[Checkpoint] Phase 9: Release Readiness" && git push`

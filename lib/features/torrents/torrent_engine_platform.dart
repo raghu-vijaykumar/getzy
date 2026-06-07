@@ -51,4 +51,26 @@ class TorrentEnginePlatform {
       // Fall back to local implementation.
     }
   }
+
+  static Future<void> updateNotification({
+    required int torrentCount,
+    required int activeCount,
+    required String downloadSpeed,
+    required String uploadSpeed,
+    String? title,
+    String? text,
+  }) async {
+    try {
+      await _channel.invokeMethod<void>('updateNotification', {
+        'torrent_count': torrentCount,
+        'active_count': activeCount,
+        'download_speed': downloadSpeed,
+        'upload_speed': uploadSpeed,
+        if (title != null) 'notification_title': title,
+        if (text != null) 'notification_text': text,
+      });
+    } on MissingPluginException {
+      // Native engine is not available on this platform.
+    }
+  }
 }

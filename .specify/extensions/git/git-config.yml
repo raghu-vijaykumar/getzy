@@ -12,51 +12,74 @@ init_commit_message: "[Spec Kit] Initial commit"
 # Each key can be true/false. Message is customizable per-command.
 auto_commit:
   default: false
-  before_clarify:
-    enabled: false
-    message: "[Spec Kit] Save progress before clarification"
-  before_plan:
-    enabled: false
-    message: "[Spec Kit] Save progress before planning"
-  before_tasks:
-    enabled: false
-    message: "[Spec Kit] Save progress before task generation"
-  before_implement:
-    enabled: false
-    message: "[Spec Kit] Save progress before implementation"
-  before_checklist:
-    enabled: false
-    message: "[Spec Kit] Save progress before checklist"
-  before_analyze:
-    enabled: false
-    message: "[Spec Kit] Save progress before analysis"
-  before_taskstoissues:
-    enabled: false
-    message: "[Spec Kit] Save progress before issue sync"
-  after_constitution:
-    enabled: false
-    message: "[Spec Kit] Add project constitution"
+  push_default: false
+
+  # Checkpoint events — commit + push at each major phase boundary
   after_specify:
-    enabled: false
-    message: "[Spec Kit] Add specification"
+    enabled: true
+    push: true
+    message: "[Checkpoint] Add specification (spec.md)"
   after_clarify:
-    enabled: false
-    message: "[Spec Kit] Clarify specification"
+    enabled: true
+    push: true
+    message: "[Checkpoint] Clarify specification"
   after_plan:
-    enabled: false
-    message: "[Spec Kit] Add implementation plan"
+    enabled: true
+    push: true
+    message: "[Checkpoint] Add implementation plan (plan.md)"
   after_tasks:
-    enabled: false
-    message: "[Spec Kit] Add tasks"
+    enabled: true
+    push: true
+    message: "[Checkpoint] Add task breakdown (tasks.md)"
   after_implement:
-    enabled: false
-    message: "[Spec Kit] Implementation progress"
+    enabled: true
+    push: true
+    message: "[Checkpoint] Implementation progress"
+
+  # Pre-event safety commits (no push — just save before mutation)
+  before_clarify:
+    enabled: true
+    push: false
+    message: "[Checkpoint] Save progress before clarification"
+  before_plan:
+    enabled: true
+    push: false
+    message: "[Checkpoint] Save progress before planning"
+  before_tasks:
+    enabled: true
+    push: false
+    message: "[Checkpoint] Save progress before task generation"
+  before_implement:
+    enabled: true
+    push: false
+    message: "[Checkpoint] Save progress before implementation"
+  before_checklist:
+    enabled: true
+    push: false
+    message: "[Checkpoint] Save progress before checklist"
+  before_analyze:
+    enabled: true
+    push: false
+    message: "[Checkpoint] Save progress before analysis"
+  before_taskstoissues:
+    enabled: true
+    push: false
+    message: "[Checkpoint] Save progress before issue sync"
+
+  # After-events (post-commit + push to remote)
+  after_constitution:
+    enabled: true
+    push: true
+    message: "[Checkpoint] Add project constitution"
   after_checklist:
-    enabled: false
-    message: "[Spec Kit] Add checklist"
+    enabled: true
+    push: true
+    message: "[Checkpoint] Add checklist"
   after_analyze:
-    enabled: false
-    message: "[Spec Kit] Add analysis report"
+    enabled: true
+    push: true
+    message: "[Checkpoint] Add analysis report"
   after_taskstoissues:
-    enabled: false
-    message: "[Spec Kit] Sync tasks to issues"
+    enabled: true
+    push: true
+    message: "[Checkpoint] Sync tasks to issues"

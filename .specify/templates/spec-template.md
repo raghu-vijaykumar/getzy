@@ -129,3 +129,10 @@
 - [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
 - [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
 - [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]
+
+## Checkpoint Workflow
+
+> Implementation follows the tasks in `tasks.md`. At each phase boundary, commit and push your progress:
+> `git add . && git commit -m "[Checkpoint] <phase description>" && git push`
+>
+> Auto-commit hooks are configured in `.specify/extensions/git/git-config.yml` for automatic checkpoints before/after core commands.

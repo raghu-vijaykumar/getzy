@@ -57,3 +57,8 @@ String? validateTorrentSource(String source) {
   }
   return null;
 }
+
+bool needsStoragePermission(String source) {
+  final lower = source.trim().toLowerCase();
+  return lower.endsWith('.torrent') && !lower.startsWith('http');
+}

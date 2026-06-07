@@ -134,4 +134,9 @@ class TorrentDatabase {
     final rows = await db.query('settings', where: 'key = ?', whereArgs: [key]);
     return rows.isEmpty ? null : rows.first['value'] as String?;
   }
+
+  void reset() {
+    _database?.close();
+    _database = null;
+  }
 }

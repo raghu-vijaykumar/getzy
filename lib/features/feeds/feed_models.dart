@@ -75,13 +75,15 @@ class RssItem {
   final String? torrentSource;
 
   factory RssItem.fromXmlElement(XmlElement element) {
-    final titleSource = element.getElement('title')?.value;
-    final linkSource = element.getElement('link')?.value;
-    final pubDateSource = element.getElement('pubDate')?.value;
+    final titleSource = element.getElement('title')?.innerText;
+    final linkSource = element.getElement('link')?.innerText;
+    final pubDateSource = element.getElement('pubDate')?.innerText;
     final title = titleSource?.trim() ?? 'Untitled item';
     final link = linkSource?.trim() ?? '';
     final pubDate = pubDateSource?.trim();
-    final published = pubDate != null ? DateTime.tryParse(pubDate) : null;
+    final published = pubDate != null
+        ? (_tryParseRssDate(pubDate) ?? DateTime.tryParse(pubDate))
+        : null;
     final enclosure = element.getElement('enclosure')?.getAttribute('url');
     final torrentSource =
         _sourceFromLink(link) ?? _sourceFromLink(enclosure ?? '');
@@ -92,6 +94,24 @@ class RssItem {
       publishedDate: published,
       torrentSource: torrentSource,
     );
+  }
+
+  static DateTime? _tryParseRssDate(String date) {
+    // RFC 2822: "Mon, 01 Jun 2024 12:00:00 GMT"
+    const months = {
+      'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
+      'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12,
+    };
+    final m = RegExp(r'(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+(\d{4})\s+(\d{2}):(\d{2}):(\d{2})')
+        .firstMatch(date);
+    if (m == null) return null;
+    final month = months[m.group(2)!]!;
+    final day = int.parse(m.group(1)!);
+    final year = int.parse(m.group(3)!);
+    final hour = int.parse(m.group(4)!);
+    final minute = int.parse(m.group(5)!);
+    final second = int.parse(m.group(6)!);
+    return DateTime.utc(year, month, day, hour, minute, second);
   }
 
   static String? _sourceFromLink(String source) {

@@ -267,13 +267,14 @@ class _TorrentHomeScreenState extends State<TorrentHomeScreen> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
+              scrollable: true,
               title: const Text('Sort by', style: TextStyle(fontSize: 30)),
               content: SizedBox(
                 width: 420,
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: TorrentSortOption.values.map((sortOption) {
-                    return RadioListTile<TorrentSortOption>(
+                    mainAxisSize: MainAxisSize.min,
+                    children: TorrentSortOption.values.map((sortOption) {
+                      return RadioListTile<TorrentSortOption>(
                       value: sortOption,
                       groupValue: selectedOption,
                       activeColor: GetzyColors.accent,
@@ -333,8 +334,8 @@ class _TorrentHomeScreenState extends State<TorrentHomeScreen> {
         );
         break;
       case _OverflowAction.settings:
-        Navigator.of(context)
-            .push(MaterialPageRoute(builder: (_) => const SettingsScreen()));
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => SettingsScreen(engine: widget.engine)));
         break;
       case _OverflowAction.shutdown:
         widget.engine.shutdown();
