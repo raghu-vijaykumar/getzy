@@ -8,7 +8,7 @@
 - [x] T002 Add dependencies for state management, routing, persistence, file picking, permissions, connectivity, battery, and testing.
 - [x] T003 Add Getzy app shell, router, and dark Material theme.
 - [x] T004 Add linting rules and CI-friendly test commands.
-- [ ] T005 Add legal-use and privacy text assets for onboarding/about.
+- [x] T005 Add legal-use and privacy text assets for onboarding/about.
 
 ## Phase 2: Domain Models and Persistence
 
