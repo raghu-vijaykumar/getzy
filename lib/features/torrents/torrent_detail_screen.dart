@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/getzy_theme.dart';
+import 'file_tree_widget.dart';
 import 'torrent_models.dart';
 import 'torrent_engine.dart';
 
@@ -16,7 +17,8 @@ class TorrentDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final files = _sampleTorrentFiles(torrent.name);
+    final c = GetzyColors.of(context);
+    final fileEntries = _sampleFileTree(torrent.name);
     final trackers = ['tracker.openbittorrent.com', 'tracker.opentrackr.org'];
     final peers = ['23.45.1.12', '72.216.14.99'];
 
@@ -34,53 +36,35 @@ class TorrentDetailScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
         children: [
-          const Text('Torrent details', style: TextStyle(fontSize: 28)),
+          Text('Torrent details', style: TextStyle(fontSize: 28, color: c.textPrimary)),
           const SizedBox(height: 18),
           Text('Status: ${torrent.status.label}',
-              style: const TextStyle(fontSize: 16)),
+              style: TextStyle(fontSize: 16, color: c.textSecondary)),
           const SizedBox(height: 6),
           Text('Progress: ${(torrent.progress * 100).round()}%',
-              style: const TextStyle(fontSize: 16)),
+              style: TextStyle(fontSize: 16, color: c.textSecondary)),
           const SizedBox(height: 24),
-          const Text('Files',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+          Text('Files',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: c.textPrimary)),
           const SizedBox(height: 8),
-          for (final item in files)
-            Card(
-              color: GetzyColors.surface,
-              margin: const EdgeInsets.symmetric(vertical: 6),
-              child: ListTile(
-                title: Text(item.path),
-                subtitle: Text('${item.percentage}% • ${item.progressLabel}'),
-                trailing: DropdownButton<FilePriority>(
-                  value: item.priority,
-                  items: FilePriority.values
-                      .map((priority) => DropdownMenuItem(
-                            value: priority,
-                            child: Text(priority.label),
-                          ))
-                      .toList(),
-                  onChanged: (_) {},
-                ),
-              ),
-            ),
+          FileTreeWidget(roots: fileEntries),
           const SizedBox(height: 24),
-          const Text('Trackers',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+          Text('Trackers',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: c.textPrimary)),
           const SizedBox(height: 8),
           for (final tracker in trackers)
             ListTile(
-              leading: const Icon(Icons.public),
-              title: Text(tracker),
+              leading: Icon(Icons.public, color: c.textSecondary),
+              title: Text(tracker, style: TextStyle(color: c.textPrimary)),
             ),
           const SizedBox(height: 24),
-          const Text('Peers',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+          Text('Peers',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: c.textPrimary)),
           const SizedBox(height: 8),
           for (final peer in peers)
             ListTile(
-              leading: const Icon(Icons.wifi),
-              title: Text(peer),
+              leading: Icon(Icons.wifi, color: c.textSecondary),
+              title: Text(peer, style: TextStyle(color: c.textPrimary)),
             ),
         ],
       ),
@@ -116,54 +100,85 @@ class TorrentDetailScreen extends StatelessWidget {
   }
 }
 
-class TorrentFileInfo {
-  TorrentFileInfo({
-    required this.path,
-    required this.percentage,
-    required this.progressLabel,
-    required this.priority,
-  });
-
-  final String path;
-  final int percentage;
-  final String progressLabel;
-  final FilePriority priority;
-}
-
-enum FilePriority { high, normal, low }
-
-extension FilePriorityLabel on FilePriority {
-  String get label {
-    switch (this) {
-      case FilePriority.high:
-        return 'High';
-      case FilePriority.normal:
-        return 'Normal';
-      case FilePriority.low:
-        return 'Low';
-    }
-  }
-}
-
-List<TorrentFileInfo> _sampleTorrentFiles(String torrentName) {
+List<FileTreeEntry> _sampleFileTree(String torrentName) {
   return [
-    TorrentFileInfo(
-      path: '$torrentName / setup.exe',
-      percentage: 100,
-      progressLabel: 'Finished',
-      priority: FilePriority.normal,
-    ),
-    TorrentFileInfo(
-      path: '$torrentName / readme.txt',
-      percentage: 100,
-      progressLabel: 'Finished',
-      priority: FilePriority.low,
-    ),
-    TorrentFileInfo(
-      path: '$torrentName / images/cover.png',
-      percentage: 68,
-      progressLabel: 'Downloading',
-      priority: FilePriority.high,
-    ),
+    FileTreeEntry(name: '$torrentName/', children: [
+      FileTreeEntry(
+        name: 'ubuntu-24.04-desktop-amd64.iso',
+        fullPath: '$torrentName/ubuntu-24.04-desktop-amd64.iso',
+        percentage: 100,
+        progressLabel: 'Finished',
+      ),
+      FileTreeEntry(
+        name: 'SHA256SUMS',
+        fullPath: '$torrentName/SHA256SUMS',
+        percentage: 100,
+        progressLabel: 'Finished',
+      ),
+      FileTreeEntry(
+        name: 'SHA256SUMS.gpg',
+        fullPath: '$torrentName/SHA256SUMS.gpg',
+        percentage: 100,
+        progressLabel: 'Finished',
+      ),
+      FileTreeEntry(name: 'images', children: [
+        FileTreeEntry(
+          name: 'logo.png',
+          fullPath: '$torrentName/images/logo.png',
+          percentage: 100,
+          progressLabel: 'Finished',
+        ),
+        FileTreeEntry(
+          name: 'screenshot.jpg',
+          fullPath: '$torrentName/images/screenshot.jpg',
+          percentage: 100,
+          progressLabel: 'Finished',
+        ),
+      ]),
+      FileTreeEntry(name: 'docs', children: [
+        FileTreeEntry(
+          name: 'README.txt',
+          fullPath: '$torrentName/docs/README.txt',
+          percentage: 100,
+          progressLabel: 'Finished',
+        ),
+        FileTreeEntry(name: 'release-notes', children: [
+          FileTreeEntry(
+            name: 'whats-new.html',
+            fullPath: '$torrentName/docs/release-notes/whats-new.html',
+            percentage: 100,
+            progressLabel: 'Finished',
+          ),
+          FileTreeEntry(
+            name: 'known-issues.html',
+            fullPath: '$torrentName/docs/release-notes/known-issues.html',
+            percentage: 100,
+            progressLabel: 'Finished',
+          ),
+        ]),
+      ]),
+      FileTreeEntry(name: 'extras', children: [
+        FileTreeEntry(
+          name: 'gnome-extensions.zip',
+          fullPath: '$torrentName/extras/gnome-extensions.zip',
+          percentage: 68,
+          progressLabel: 'Downloading',
+        ),
+        FileTreeEntry(name: 'wallpapers', children: [
+          FileTreeEntry(
+            name: 'mountain.jpg',
+            fullPath: '$torrentName/extras/wallpapers/mountain.jpg',
+            percentage: 42,
+            progressLabel: 'Downloading',
+          ),
+          FileTreeEntry(
+            name: 'sunset.jpg',
+            fullPath: '$torrentName/extras/wallpapers/sunset.jpg',
+            percentage: 15,
+            progressLabel: 'Downloading',
+          ),
+        ]),
+      ]),
+    ]),
   ];
 }

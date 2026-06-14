@@ -30,18 +30,15 @@ Three major missing features were also reported:
 3. When a local `.torrent` file is added, the engine MUST parse the file for metadata.
 4. After metadata is resolved, a **file selection dialog** MUST be shown listing all files in the torrent with their sizes, allowing the user to select/deselect individual files before download starts.
 5. After file selection is confirmed, the engine MUST begin actual downloading (connecting to peers via DHT/trackers, requesting pieces, writing to disk).
-6. The `FakeTorrentEngine` simulation path MUST still exist for testing — consider a `FakeTorrentEngine` vs `RealTorrentEngine` split, or an engine adapter that can be swapped.
+6. The engine MUST use real libtorrent via the JNI bridge — no simulation or fake engine fallback.
 
 **Implementation notes**:
-- Flutter has no mature pure-Dart BitTorrent library. Options:
-  - **Platform channel to native libtorrent** (recommended for Android) — requires adding a native plugin that links libtorrent.
-  - **Pure Dart BitTorrent client** (high effort, high risk).
-  - **Enhanced simulation** — make `FakeTorrentEngine` simulate metadata resolution (async delay, then realistic files), simulate download progress over time, and simulate completion. This is the pragmatic path for a demo/app that doesn't need to download real copyrighted content.
-- The enhanced simulation path should:
-  - Validate and parse real `.torrent` files (bencode parser) when a file or URL is provided.
-  - For magnet links, generate a realistic file set based on the info hash (since we can't actually resolve DHT without a real engine).
-  - Simulate progress with a timer-based increment.
-  - Surface files in `TorrentTask.files` for the file selection UI.
+- The engine uses libtorrent compiled for Android via the JNI C++ bridge (`torrent_bridge.cpp`).
+- Magnet links are resolved by libtorrent's DTH/tracker resolution — metadata is fetched from peers before a `TorrentTask` is created.
+- `.torrent` files (HTTP or local) are parsed by libtorrent's bencode parser.
+- The Dart side communicates via `MethodChannel` (commands) and `EventChannel` (status updates).
+- `FakeTorrentEngine` is removed entirely — only `RealTorrentEngine` exists in production builds.
+- Tests use `RealTorrentEngine` with a test session or mock the platform channel.
 
 ---
 
@@ -50,7 +47,7 @@ Three major missing features were also reported:
 **Problem**: Currently when a torrent is added, it goes directly to the torrent list. Users have no way to see or select which files they want to download.
 
 **Requirements**:
-1. After metadata is resolved (or synthetic metadata is generated), show a **full-screen file selection dialog** or a **bottom sheet** listing all files with:
+1. After metadata is resolved, show a **full-screen file selection dialog** or a **bottom sheet** listing all files with:
    - Checkbox per file (default: all selected)
    - File name/path within the torrent
    - File size formatted
@@ -137,7 +134,7 @@ Three major missing features were also reported:
 
 **Requirements**:
 1. All protocol toggles MUST be persisted to settings DB (keys: `enable_dht`, `enable_lsd`, `enable_upnp`, `enable_nat_pmp`, `enable_pex`, `enable_utp`, `random_port`, `contact_all_trackers`).
-2. The engine MUST respect these settings when establishing connections. On a real engine, these would be passed as session params. On the fake engine, the values should be stored and readable but have no real effect.
+2. The engine MUST respect these settings when establishing connections — values are passed as libtorrent session params via the JNI bridge.
 3. **Use random port**: When enabled, assign a random port from 49152-65535. When disabled, enable the "Set a port number" row and allow the user to enter a specific port (key: `listening_port`, default 55623).
 
 ---
@@ -215,7 +212,7 @@ Three major missing features were also reported:
 
 ## Success Criteria
 
-- **SC-001**: Adding a magnet link shows a file selection dialog with parsed (or simulated) file metadata, then the torrent progresses through download states to completion.
+- **SC-001**: Adding a magnet link resolves real metadata via libtorrent, shows a file selection dialog with parsed file metadata, then the torrent downloads actual data to completion.
 - **SC-002**: Toggling between Dark / Light / System themes in Interface > Settings immediately updates the entire app UI.
 - **SC-003**: Adjusting the text size slider in Interface > Settings scales all text in the app between 70% and 150%.
 - **SC-004**: At least 20 of the 36 currently UI-only settings are wired to functional behavior (persisted and consumed by the engine or app).
@@ -224,12 +221,11 @@ Three major missing features were also reported:
 
 ---
 
-## Out of Scope for v2
+## Out of Scope for v2.1+
 
-- Real native libtorrent integration (deferred to v3 — v2 uses enhanced simulation).
 - Streaming playback while downloading.
 - Peer blocking / IP filter lists.
-- DHT node bootstrapping.
+- DHT node bootstrapping (handled by libtorrent internally).
 - Web seed support.
 - µTorrent/Mac/desktop builds.
 
@@ -250,12 +246,14 @@ Three major missing features were also reported:
 8. Feed settings (FR-012) — interval picker, cleanup logic
 9. Network interface selection (FR-013) — OK button + persistence
 
-### Phase 3: Engine Integration (Complex)
-10. Metadata fetch & download (FR-001) — enhanced simulation with bencode parsing, timer progress
-11. File selection dialog (FR-002) — full-screen file list with checkboxes
-12. Bandwidth settings (FR-006) — speed limiters, connection count limit
-13. Network protocol settings (FR-008) — DHT/LSD/UPnP/NAT-PMP/PEX/uTP toggles + port config
-14. Privacy & Security settings (FR-009) — encryption, proxy, IP filter
+### Phase 3: Real Engine via libtorrent JNI (Complex)
+10. Build libtorrent for Android & set up JNI bridge (`torrent_bridge.cpp`, prebuilt .so files)
+11. Create native Kotlin plugin (`TorrentBridge.kt`, `TorrentEnginePlugin.kt`) with all 11 MethodChannel methods + EventChannel polling
+12. Create `RealTorrentEngine` Dart class implementing `TorrentEngine` — EventChannel listener, metadata resolution, real download
+13. File selection dialog (FR-002) — full-screen file list with checkboxes, wire `setFilePriorities` to native
+14. Bandwidth settings (FR-006) — pass speed limits & connection limits to libtorrent session params
+15. Network protocol settings (FR-008) — DHT/LSD/UPnP/NAT-PMP/PEX/uTP toggles + port config as session params
+16. Privacy & Security settings (FR-009) — encryption, proxy, IP filter passed to native
 
 ---
 
@@ -263,7 +261,8 @@ Three major missing features were also reported:
 
 - `getzy_theme.dart` — add `buildLightTheme()`, refactor `buildGetzyTheme()` to accept brightness param.
 - `getzy_app.dart` — add `themeMode` state, listen to settings changes, wrap in custom `MediaQuery` for text scale.
-- `FakeTorrentEngine` — add bencode parser for `.torrent` files, add progress simulation timer, add file list generation, support throttle/concurrency settings.
+- `RealTorrentEngine` — new Dart class implementing `TorrentEngine` via `MethodChannel`/`EventChannel` to native libtorrent. Used in production on Android. Throws `UnsupportedError` on other platforms.
+- `FakeTorrentEngine` — removed entirely. No simulation path exists.
 - `SettingRowData` — extend with new interactive types: `SettingRowType.slider`, `SettingRowType.numeric`, `SettingRowType.timePicker`, `SettingRowType.directoryPicker`, `SettingRowType.radioGroup`.
 - `_SettingRowState` — handle new row types in `build()`.
 - `settings_repository.dart` — no changes needed (generic key-value storage already works).

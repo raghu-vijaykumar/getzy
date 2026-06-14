@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -5,6 +7,7 @@ import '../../app/getzy_theme.dart';
 import '../feeds/feed_manager_screen.dart';
 import '../session/session_status_screen.dart';
 import '../settings/settings_screen.dart';
+import 'file_selection_screen.dart';
 import 'queue_editor_screen.dart';
 import 'torrent_detail_screen.dart';
 import 'torrent_engine.dart';
@@ -33,9 +36,45 @@ class _TorrentHomeScreenState extends State<TorrentHomeScreen> {
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   String _query = '';
+  StreamSubscription<TorrentEngineEvent>? _eventSub;
+
+
+  @override
+  void initState() {
+    super.initState();
+    _eventSub = widget.engine.events.listen(_onEngineEvent);
+  }
+
+  void _onEngineEvent(TorrentEngineEvent event) {
+    if (event is TorrentAwaitingFileSelection) {
+      _showFileSelection(event.infoHash, event.files);
+    }
+  }
+
+  Future<void> _showFileSelection(String infoHash, List<TorrentFile> files) async {
+    if (!mounted) return;
+    final result = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => FileSelectionScreen(
+          files: files,
+          torrentName: 'Torrent',
+          onConfirm: (selectedFiles) {
+            widget.engine.setFilePriorities(infoHash, selectedFiles);
+            Navigator.of(context).pop(true);
+          },
+          onCancel: () {
+            widget.engine.deleteTorrent(infoHash);
+            Navigator.of(context).pop(false);
+          },
+        ),
+      ),
+    );
+    if (result == null || result) return;
+  }
 
   @override
   void dispose() {
+    _eventSub?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -128,6 +167,7 @@ class _TorrentHomeScreenState extends State<TorrentHomeScreen> {
   }
 
   Widget _buildToolbar(BuildContext context) {
+    final c = GetzyColors.of(context);
     if (_isSearching) {
       return Padding(
         padding: const EdgeInsets.fromLTRB(8, 16, 16, 14),
@@ -176,10 +216,10 @@ class _TorrentHomeScreenState extends State<TorrentHomeScreen> {
       padding: const EdgeInsets.fromLTRB(24, 28, 12, 18),
       child: Row(
         children: [
-          const Expanded(
+          Expanded(
             child: Text(
               'Getzy',
-              style: TextStyle(fontSize: 30, color: GetzyColors.textPrimary),
+              style: TextStyle(fontSize: 30, color: c.textPrimary),
             ),
           ),
           IconButton(
@@ -199,7 +239,7 @@ class _TorrentHomeScreenState extends State<TorrentHomeScreen> {
           ),
           PopupMenuButton<_OverflowAction>(
             tooltip: 'More actions',
-            color: GetzyColors.surface,
+            color: c.surface,
             onSelected: _handleOverflowAction,
             itemBuilder: (context) => const [
               PopupMenuItem(
@@ -259,6 +299,7 @@ class _TorrentHomeScreenState extends State<TorrentHomeScreen> {
   }
 
   Future<void> _showSortDialog() async {
+    final c = GetzyColors.of(context);
     TorrentSortOption selectedOption = widget.engine.sortOption;
 
     final option = await showDialog<TorrentSortOption>(
@@ -277,7 +318,7 @@ class _TorrentHomeScreenState extends State<TorrentHomeScreen> {
                       return RadioListTile<TorrentSortOption>(
                       value: sortOption,
                       groupValue: selectedOption,
-                      activeColor: GetzyColors.accent,
+                      activeColor: c.accent,
                       title: Text(sortOption.label),
                       onChanged: (value) {
                         if (value != null) {
@@ -363,11 +404,12 @@ class _TorrentList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = GetzyColors.of(context);
     if (torrents.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
           'No torrents here',
-          style: TextStyle(color: GetzyColors.textSecondary, fontSize: 18),
+          style: TextStyle(color: c.textSecondary, fontSize: 18),
         ),
       );
     }
@@ -410,6 +452,7 @@ class _AddTorrentDialogState extends State<_AddTorrentDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final c = GetzyColors.of(context);
     return AlertDialog(
       title: const Text('Add magnet link', style: TextStyle(fontSize: 30)),
       content: SizedBox(
@@ -438,7 +481,7 @@ class _AddTorrentDialogState extends State<_AddTorrentDialog> {
               alignment: Alignment.centerLeft,
               child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: GetzyColors.action,
+                  backgroundColor: c.action,
                 ),
                 onPressed: _pickTorrentFile,
                 icon: const Icon(Icons.folder_open),
@@ -503,9 +546,10 @@ class _TorrentTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = GetzyColors.of(context);
     final statusColor = torrent.status == TorrentStatus.blocked
-        ? GetzyColors.warning
-        : GetzyColors.textSecondary;
+        ? c.warning
+        : c.textSecondary;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
@@ -520,8 +564,8 @@ class _TorrentTile extends StatelessWidget {
               child: Center(
                 child: Material(
                   color: torrent.status == TorrentStatus.finished
-                      ? GetzyColors.elevated
-                      : GetzyColors.action,
+                      ? c.elevated
+                      : c.action,
                   shape: const CircleBorder(),
                   child: IconButton(
                     tooltip: torrent.status.isRunning
@@ -546,8 +590,8 @@ class _TorrentTile extends StatelessWidget {
                     torrent.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: GetzyColors.textPrimary,
+                    style: TextStyle(
+                      color: c.textPrimary,
                       fontSize: 19,
                       height: 1.2,
                     ),
@@ -556,8 +600,8 @@ class _TorrentTile extends StatelessWidget {
                   LinearProgressIndicator(
                     value: torrent.progress,
                     minHeight: 4,
-                    backgroundColor: GetzyColors.divider,
-                    color: GetzyColors.textSecondary,
+                    backgroundColor: c.divider,
+                    color: c.textSecondary,
                     borderRadius: BorderRadius.circular(4),
                   ),
                   const SizedBox(height: 8),
@@ -572,8 +616,8 @@ class _TorrentTile extends StatelessWidget {
                     '  |  ${formatSpeed(torrent.uploadSpeedBytes)} up',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: GetzyColors.textSecondary,
+                    style: TextStyle(
+                      color: c.textSecondary,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
@@ -582,8 +626,8 @@ class _TorrentTile extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       torrent.blockedReason!,
-                      style: const TextStyle(
-                        color: GetzyColors.warning,
+                      style: TextStyle(
+                        color: c.warning,
                         fontSize: 13,
                       ),
                     ),
@@ -606,11 +650,12 @@ class _MenuItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = GetzyColors.of(context);
     return SizedBox(
       width: 220,
       child: Row(
         children: [
-          Icon(icon, color: GetzyColors.textSecondary),
+          Icon(icon, color: c.textSecondary),
           const SizedBox(width: 20),
           Expanded(
             child: Text(

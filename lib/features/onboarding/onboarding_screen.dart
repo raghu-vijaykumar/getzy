@@ -17,6 +17,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = GetzyColors.of(context);
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -24,32 +25,32 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Getzy',
-                style: TextStyle(fontSize: 42, color: GetzyColors.textPrimary),
+                style: TextStyle(fontSize: 42, color: c.textPrimary),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'Torrent Downloader',
                 style: TextStyle(
                   fontSize: 20,
-                  color: GetzyColors.textSecondary,
+                  color: c.textSecondary,
                 ),
               ),
               const SizedBox(height: 48),
               Expanded(
                 child: ListView(
                   children: [
-                    const Text(
+                    Text(
                       'Legal notice',
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
-                        color: GetzyColors.textPrimary,
+                        color: c.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       'Getzy is a torrent downloader. Use Getzy only for '
                       'downloading content you have the legal right to access. '
                       'The developers assume no liability for misuse of this '
@@ -59,21 +60,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       'please comply with applicable laws in your jurisdiction.',
                       style: TextStyle(
                         fontSize: 16,
-                        color: GetzyColors.textSecondary,
+                        color: c.textSecondary,
                         height: 1.5,
                       ),
                     ),
                     const SizedBox(height: 32),
-                    const Text(
+                    Text(
                       'Privacy policy',
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.w800,
-                        color: GetzyColors.textPrimary,
+                        color: c.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       'Getzy does not collect, store, or transmit any personal '
                       'information.\n\n'
                       'No analytics, crash reporting, or telemetry is included.\n\n'
@@ -86,7 +87,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       'No usage statistics are collected.',
                       style: TextStyle(
                         fontSize: 16,
-                        color: GetzyColors.textSecondary,
+                        color: c.textSecondary,
                         height: 1.5,
                       ),
                     ),
@@ -98,7 +99,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   Checkbox(
                     value: _accepted,
-                    activeColor: GetzyColors.accent,
+                    activeColor: c.accent,
                     onChanged: (value) =>
                         setState(() => _accepted = value ?? false),
                   ),
@@ -106,11 +107,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: GestureDetector(
                       onTap: () =>
                           setState(() => _accepted = !_accepted),
-                      child: const Text(
+                      child: Text(
                         'I understand that I am responsible for complying with '
                         'applicable laws when using Getzy.',
                         style: TextStyle(
-                          color: GetzyColors.textSecondary,
+                          color: c.textSecondary,
                           fontSize: 14,
                           height: 1.3,
                         ),
@@ -126,17 +127,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
-                        _accepted ? GetzyColors.action : GetzyColors.elevated,
+                        _accepted ? c.action : c.elevated,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(28),
                     ),
                   ),
                   onPressed: _accepted ? _onAccept : null,
-                  child: const Text(
+                  child: Text(
                     'Continue',
                     style: TextStyle(
                       fontSize: 18,
-                      color: GetzyColors.textPrimary,
+                      color: c.textPrimary,
                     ),
                   ),
                 ),

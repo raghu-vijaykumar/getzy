@@ -24,6 +24,67 @@ class GetzyColors {
   static const actionLight = Color(0xFF006B82);
   static const fabLight = Color(0xFFC2185B);
   static const warningLight = Color(0xFFE65100);
+
+  static GetzyColorSet of(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? _darkColors : _lightColors;
+  }
+
+  static const _darkColors = GetzyColorSet._(
+    background: Color(0xFF0C1113),
+    surface: Color(0xFF202528),
+    elevated: Color(0xFF2A2F32),
+    divider: Color(0xFF30373A),
+    textPrimary: Color(0xFFE7EAEC),
+    textSecondary: Color(0xFFB7BEC2),
+    textDisabled: Color(0xFF5D666A),
+    accent: Color(0xFF67D5FF),
+    action: Color(0xFF008DAA),
+    fab: Color(0xFFA9004C),
+    warning: Color(0xFFFFD54F),
+  );
+
+  static const _lightColors = GetzyColorSet._(
+    background: Color(0xFFF5F7F8),
+    surface: Color(0xFFFFFFFF),
+    elevated: Color(0xFFF0F2F3),
+    divider: Color(0xFFDDE1E4),
+    textPrimary: Color(0xFF1A1C1E),
+    textSecondary: Color(0xFF5D666A),
+    textDisabled: Color(0xFF9EA8AD),
+    accent: Color(0xFF008DAA),
+    action: Color(0xFF006B82),
+    fab: Color(0xFFC2185B),
+    warning: Color(0xFFE65100),
+  );
+}
+
+class GetzyColorSet {
+  const GetzyColorSet._({
+    required this.background,
+    required this.surface,
+    required this.elevated,
+    required this.divider,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.textDisabled,
+    required this.accent,
+    required this.action,
+    required this.fab,
+    required this.warning,
+  });
+
+  final Color background;
+  final Color surface;
+  final Color elevated;
+  final Color divider;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color textDisabled;
+  final Color accent;
+  final Color action;
+  final Color fab;
+  final Color warning;
 }
 
 ThemeData buildDarkTheme() {

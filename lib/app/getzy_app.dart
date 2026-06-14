@@ -5,13 +5,15 @@ import 'package:flutter/services.dart';
 
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/settings/settings_repository.dart';
-import '../features/torrents/fake_torrent_engine.dart';
+import '../features/torrents/real_torrent_engine.dart';
 import '../features/torrents/torrent_engine.dart';
 import '../features/torrents/torrent_home_screen.dart';
 import 'getzy_theme.dart';
 
 class GetzyApp extends StatefulWidget {
-  const GetzyApp({super.key});
+  const GetzyApp({super.key, this.engine});
+
+  final TorrentEngine? engine;
 
   @override
   State<GetzyApp> createState() => GetzyAppState();
@@ -23,8 +25,6 @@ class GetzyAppState extends State<GetzyApp> {
   bool? _onboardingComplete;
   ThemeMode _themeMode = ThemeMode.dark;
   double _textScaleFactor = 1.0;
-
-
 
   TorrentEngine get engine => _engine;
   ThemeMode get themeMode => _themeMode;
@@ -42,10 +42,13 @@ class GetzyAppState extends State<GetzyApp> {
     if (mounted) setState(() {});
   }
 
+  late final bool _ownsEngine;
+
   @override
   void initState() {
     super.initState();
-    _engine = FakeTorrentEngine.seeded();
+    _ownsEngine = widget.engine == null;
+    _engine = widget.engine ?? RealTorrentEngine();
     _engine.initialize();
     _channel.setMethodCallHandler(_handleNativeCall);
     _loadPreferences();
@@ -112,7 +115,9 @@ class GetzyAppState extends State<GetzyApp> {
 
   @override
   void dispose() {
-    _engine.dispose();
+    if (_ownsEngine) {
+      _engine.dispose();
+    }
     super.dispose();
   }
 
@@ -134,19 +139,22 @@ class GetzyAppState extends State<GetzyApp> {
     return MaterialApp(
       title: 'Getzy',
       debugShowCheckedModeBanner: false,
-      theme: buildDarkTheme(),
+      theme: buildLightTheme(),
       darkTheme: buildDarkTheme(),
       themeMode: _themeMode,
-      home: MediaQuery(
-        data: MediaQuery.of(context).copyWith(
-          textScaler: TextScaler.linear(_textScaleFactor),
-        ),
-        child: _onboardingComplete == true
-            ? TorrentHomeScreen(engine: _engine)
-            : OnboardingScreen(
-                homeBuilder: (_) => TorrentHomeScreen(engine: _engine),
-              ),
-      ),
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.linear(_textScaleFactor),
+          ),
+          child: child!,
+        );
+      },
+      home: _onboardingComplete == true
+          ? TorrentHomeScreen(engine: _engine)
+          : OnboardingScreen(
+              homeBuilder: (_) => TorrentHomeScreen(engine: _engine),
+            ),
     );
   }
 }

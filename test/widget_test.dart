@@ -4,9 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:getzy/app/getzy_app.dart';
+import 'package:getzy/features/torrents/fake_torrent_engine.dart';
 
 void main() {
-  setUpAll(() {
+  late FakeTorrentEngine engine;
+
+  setUp(() {
+    engine = FakeTorrentEngine.seeded();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
       const MethodChannel('plugins.flutter.io/path_provider'),
@@ -15,9 +19,14 @@ void main() {
       },
     );
   });
+
+  tearDown(() {
+    engine.dispose();
+  });
+
   testWidgets('renders Getzy home with torrent tabs and mock data',
       (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.pump();
 
     expect(find.text('Getzy'), findsOneWidget);
@@ -29,7 +38,7 @@ void main() {
   });
 
   testWidgets('filters torrents from the search toolbar', (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.pump();
 
     await tester.tap(find.byTooltip('Search torrents'));
@@ -43,7 +52,7 @@ void main() {
 
   testWidgets('adds a valid info hash through the add torrent dialog',
       (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.pump();
 
     await tester.tap(find.text('Add torrent'));
@@ -61,7 +70,7 @@ void main() {
   });
 
   testWidgets('opens settings from the overflow menu', (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.pump();
 
     await tester.tap(find.byTooltip('More actions'));
@@ -77,7 +86,7 @@ void main() {
   });
 
   testWidgets('opens modify queue from the overflow menu', (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.pump();
 
     await tester.tap(find.byTooltip('More actions'));
@@ -90,7 +99,7 @@ void main() {
   });
 
   testWidgets('manages RSS feeds with add and refresh actions', (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.pump();
 
     await tester.tap(find.byTooltip('More actions'));
@@ -119,7 +128,7 @@ void main() {
 
   testWidgets('accepts local .torrent file paths in the add torrent dialog',
       (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.pump();
 
     await tester.tap(find.text('Add torrent'));

@@ -228,6 +228,9 @@ class _TestEngine extends TorrentEngine {
   void handleNotificationAction(String action) {}
 
   @override
+  void setFilePriorities(String infoHash, List<TorrentFile> files) {}
+
+  @override
   List<TorrentTask> visibleTorrents({
     required TorrentBucket bucket,
     required String query,

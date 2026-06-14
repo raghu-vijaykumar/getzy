@@ -14,6 +14,7 @@ class SessionStatusScreen extends StatelessWidget {
     return AnimatedBuilder(
       animation: engine,
       builder: (context, child) {
+        final c = GetzyColors.of(context);
         return Scaffold(
           appBar: AppBar(
             title: const Text('Session status'),
@@ -35,10 +36,10 @@ class SessionStatusScreen extends StatelessWidget {
               ),
               const Divider(height: 40),
               const _SectionTitle('INCOMING CONNECTIONS'),
-              const ListTile(
+              ListTile(
                 dense: true,
                 contentPadding: EdgeInsets.zero,
-                leading: Icon(Icons.warning, color: GetzyColors.warning),
+                leading: Icon(Icons.warning, color: c.warning),
                 title: Text('No incoming connections with port 45547'),
               ),
               const Divider(height: 40),
@@ -68,12 +69,13 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = GetzyColors.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 14),
       child: Text(
         label,
-        style: const TextStyle(
-          color: GetzyColors.textPrimary,
+        style: TextStyle(
+          color: c.textPrimary,
           fontWeight: FontWeight.w900,
           fontSize: 16,
         ),
@@ -90,19 +92,20 @@ class _DualMetricRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = GetzyColors.of(context);
     return Row(
       children: [
         Expanded(
           child: Text(
             left,
             style:
-                const TextStyle(color: GetzyColors.textSecondary, fontSize: 22),
+                TextStyle(color: c.textSecondary, fontSize: 22),
           ),
         ),
         Text(
           right,
           style:
-              const TextStyle(color: GetzyColors.textSecondary, fontSize: 22),
+              TextStyle(color: c.textSecondary, fontSize: 22),
         ),
       ],
     );

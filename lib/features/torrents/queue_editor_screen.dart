@@ -39,6 +39,7 @@ class _QueueEditorScreenState extends State<QueueEditorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = GetzyColors.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Modify queue'),
@@ -63,18 +64,18 @@ class _QueueEditorScreenState extends State<QueueEditorScreen> {
           final torrent = _orderedTorrents[index];
           return Card(
             key: ValueKey(torrent.id),
-            color: GetzyColors.elevated,
+            color: c.elevated,
             margin: const EdgeInsets.only(bottom: 12),
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: GetzyColors.action,
+                backgroundColor: c.action,
                 child: Text('${torrent.queueNumber}',
                     style: const TextStyle(color: Colors.white)),
               ),
               title: Text(torrent.name),
               subtitle: Text(torrent.status.label),
-              trailing: const Icon(Icons.drag_handle,
-                  color: GetzyColors.textSecondary),
+              trailing: Icon(Icons.drag_handle,
+                  color: c.textSecondary),
             ),
           );
         },

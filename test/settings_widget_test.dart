@@ -5,11 +5,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:getzy/app/getzy_app.dart';
 import 'package:getzy/features/settings/settings_repository.dart';
+import 'package:getzy/features/torrents/fake_torrent_engine.dart';
 import 'package:getzy/features/torrents/torrent_database.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
-  setUpAll(() async {
+  late FakeTorrentEngine engine;
+
+  setUp(() async {
+    engine = FakeTorrentEngine.seeded();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
       const MethodChannel('plugins.flutter.io/path_provider'),
@@ -31,15 +35,16 @@ void main() {
       const MethodChannel('dev.fluttercommunity.plus/charging'),
       (MethodCall methodCall) async => null,
     );
-  });
-
-  setUp(() async {
     TorrentDatabase.instance.reset();
     await SettingsRepository.instance.saveValue('onboarding_complete', 'true');
   });
 
+  tearDown(() {
+    engine.dispose();
+  });
+
   Future<void> openSettings(WidgetTester tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
     await tester.pump();
     await tester.tap(find.byTooltip('More actions'));

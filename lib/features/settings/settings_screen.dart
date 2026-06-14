@@ -59,6 +59,7 @@ class SettingsDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = GetzyColors.of(context);
     if (category.title == 'About') {
       return const AboutScreen();
     }
@@ -76,8 +77,8 @@ class SettingsDetailScreen extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 20),
                 child: Text(
                   section.title!,
-                  style: const TextStyle(
-                    color: GetzyColors.accent,
+                  style: TextStyle(
+                    color: c.accent,
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
                   ),
@@ -178,11 +179,12 @@ class _SettingRowState extends State<_SettingRow> {
 
   @override
   Widget build(BuildContext context) {
+    final c = GetzyColors.of(context);
     final row = widget.row;
     final titleColor =
-        row.enabled ? GetzyColors.textPrimary : GetzyColors.textDisabled;
+        row.enabled ? c.textPrimary : c.textDisabled;
     final subtitleColor =
-        row.enabled ? GetzyColors.textSecondary : GetzyColors.textDisabled;
+        row.enabled ? c.textSecondary : c.textDisabled;
 
     final isInteractive = row.opensThemePicker ||
         row.opensTextScaleSlider ||
@@ -248,6 +250,7 @@ class _SettingRowState extends State<_SettingRow> {
   }
 
   Future<void> _showThemePickerDialog(BuildContext context) async {
+    final c = GetzyColors.of(context);
     final current = await _settingsRepo.loadValue('theme_mode');
     var selected = switch (current) {
       'light' => 'light',
@@ -273,7 +276,7 @@ class _SettingRowState extends State<_SettingRow> {
                     RadioListTile<String>(
                       value: entry.$1,
                       groupValue: selected,
-                      activeColor: GetzyColors.accent,
+                      activeColor: c.accent,
                       title: Text(entry.$2),
                       onChanged: (value) {
                         if (value != null) {
@@ -317,6 +320,7 @@ class _SettingRowState extends State<_SettingRow> {
   }
 
   Future<void> _showTextScaleSliderDialog(BuildContext context) async {
+    final c = GetzyColors.of(context);
     final saved = await _settingsRepo.loadValue('text_scale_factor');
     var factor = double.tryParse(saved ?? '') ?? 1.0;
 
@@ -344,7 +348,7 @@ class _SettingRowState extends State<_SettingRow> {
                       'Preview text at this size',
                       style: TextStyle(
                         fontSize: 16 * factor,
-                        color: GetzyColors.textSecondary,
+                        color: c.textSecondary,
                       ),
                     ),
                     Slider(
@@ -352,7 +356,7 @@ class _SettingRowState extends State<_SettingRow> {
                       min: 0.7,
                       max: 1.5,
                       divisions: 8,
-                      activeColor: GetzyColors.accent,
+                      activeColor: c.accent,
                       onChanged: (v) {
                         setDialogState(() => factor = v);
                       },
@@ -420,6 +424,7 @@ class _SettingRowState extends State<_SettingRow> {
   }
 
   Future<void> _showNumericSliderDialog(BuildContext context) async {
+    final c = GetzyColors.of(context);
     final key = widget.row.pickerSettingKey;
     if (key == null) return;
 
@@ -450,7 +455,7 @@ class _SettingRowState extends State<_SettingRow> {
                       min: widget.row.sliderMin,
                       max: widget.row.sliderMax,
                       divisions: widget.row.sliderDivisions,
-                      activeColor: GetzyColors.accent,
+                      activeColor: c.accent,
                       onChanged: (v) {
                         setDialogState(() => value = v);
                       },
@@ -482,6 +487,7 @@ class _SettingRowState extends State<_SettingRow> {
   }
 
   Future<void> _showPresetPickerDialog(BuildContext context) async {
+    final c = GetzyColors.of(context);
     final key = widget.row.pickerSettingKey;
     final options = widget.row.presetOptions;
     if (key == null || options == null) return;
@@ -505,7 +511,7 @@ class _SettingRowState extends State<_SettingRow> {
                       RadioListTile<String>(
                         value: option.value,
                         groupValue: selected,
-                        activeColor: GetzyColors.accent,
+                        activeColor: c.accent,
                         title: Text(option.label),
                         onChanged: (value) {
                           if (value != null) {
@@ -543,6 +549,7 @@ class _SettingRowState extends State<_SettingRow> {
   }
 
   Future<void> _showNetworkInterfaceDialog(BuildContext context) async {
+    final c = GetzyColors.of(context);
     final interfaces = [
       'Any interface',
       'rmnet_data0',
@@ -576,7 +583,7 @@ class _SettingRowState extends State<_SettingRow> {
                       RadioListTile<String>(
                         value: interface,
                         groupValue: selected,
-                        activeColor: GetzyColors.accent,
+                        activeColor: c.accent,
                         title: Text(interface),
                         onChanged: (value) {
                           if (value != null) {

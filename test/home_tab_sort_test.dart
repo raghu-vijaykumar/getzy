@@ -4,10 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:getzy/app/getzy_app.dart';
-
+import 'package:getzy/features/torrents/fake_torrent_engine.dart';
 
 void main() {
-  setUpAll(() {
+  late FakeTorrentEngine engine;
+
+  setUp(() {
+    engine = FakeTorrentEngine.seeded();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
       const MethodChannel('plugins.flutter.io/path_provider'),
@@ -17,9 +20,13 @@ void main() {
     );
   });
 
+  tearDown(() {
+    engine.dispose();
+  });
+
   testWidgets('tapping FINISHED tab shows only finished torrents',
       (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.pump();
 
     expect(find.text('LibreOffice Fresh Offline Installers'), findsOneWidget);
@@ -34,7 +41,7 @@ void main() {
 
   testWidgets('tapping QUEUED tab excludes finished torrents',
       (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.pump();
 
     await tester.tap(find.text('QUEUED'));
@@ -48,7 +55,7 @@ void main() {
 
   testWidgets('sort dialog opens and can select a sort option',
       (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.pump();
 
     await tester.tap(find.byTooltip('Sort torrents'));
@@ -66,7 +73,7 @@ void main() {
   });
 
   testWidgets('overflow menu resume all shows snackbar', (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.pump();
 
     await tester.tap(find.byTooltip('More actions'));
@@ -78,7 +85,7 @@ void main() {
   });
 
   testWidgets('overflow menu pause all shows snackbar', (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.pump();
 
     await tester.tap(find.byTooltip('More actions'));
@@ -91,7 +98,7 @@ void main() {
 
   testWidgets('overflow menu session status navigates to session screen',
       (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.pump();
 
     await tester.tap(find.byTooltip('More actions'));
@@ -105,7 +112,7 @@ void main() {
   });
 
   testWidgets('overflow menu shutdown shows snackbar', (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.pump();
 
     await tester.tap(find.byTooltip('More actions'));
@@ -118,7 +125,7 @@ void main() {
 
   testWidgets('torrent row play/pause toggles torrent state',
       (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.pump();
 
     expect(find.textContaining('Downloading'), findsAtLeast(1));
@@ -133,7 +140,7 @@ void main() {
   });
 
   testWidgets('tapping torrent row opens detail screen', (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.pump();
 
     expect(find.text('Ubuntu Desktop 24.04 LTS'), findsOneWidget);
@@ -147,7 +154,7 @@ void main() {
   });
 
   testWidgets('search with no results shows empty state', (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.pump();
 
     await tester.tap(find.byTooltip('Search torrents'));

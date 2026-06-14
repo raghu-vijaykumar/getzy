@@ -76,6 +76,7 @@ class _FeedManagerScreenState extends State<FeedManagerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final c = GetzyColors.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Feed manager'),
@@ -94,14 +95,14 @@ class _FeedManagerScreenState extends State<FeedManagerScreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _feeds.isEmpty
-              ? const Center(
-                  child: Text(
-                    'No feeds configured',
-                    style: TextStyle(
-                        color: GetzyColors.textSecondary, fontSize: 18),
-                  ),
-                )
+              : _feeds.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No feeds configured',
+                        style: TextStyle(
+                            color: c.textSecondary, fontSize: 18),
+                      ),
+                    )
               : ListView.separated(
                   padding: const EdgeInsets.fromLTRB(24, 24, 24, 24),
                   itemCount: _feeds.length,
@@ -134,8 +135,8 @@ class _FeedManagerScreenState extends State<FeedManagerScreen> {
                           ],
                         ),
                         trailing: feed.autoDownload
-                            ? const Icon(Icons.download_for_offline,
-                                color: GetzyColors.accent)
+                            ? Icon(Icons.download_for_offline,
+                                color: c.accent)
                             : null,
                       ),
                     );
@@ -217,7 +218,7 @@ class _AddFeedDialogState extends State<_AddFeedDialog> {
                 Padding(
                   padding: const EdgeInsets.only(top: 8),
                   child: Text(_errorText!,
-                      style: const TextStyle(color: GetzyColors.warning)),
+                      style: TextStyle(color: GetzyColors.of(context).warning)),
                 ),
             ],
           ),

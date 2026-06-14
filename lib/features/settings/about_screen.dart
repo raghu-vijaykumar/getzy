@@ -8,6 +8,7 @@ class AboutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = GetzyColors.of(context);
     return Scaffold(
       appBar: AppBar(),
       body: ListView(
@@ -15,10 +16,10 @@ class AboutScreen extends StatelessWidget {
         children: [
           const Text('Getzy', style: TextStyle(fontSize: 42)),
           const SizedBox(height: 12),
-          const Text(
+          Text(
             'Version 1.0.0',
             style: TextStyle(
-              color: GetzyColors.textSecondary,
+              color: c.textSecondary,
               fontSize: 18,
             ),
           ),
@@ -52,6 +53,7 @@ class AboutScreen extends StatelessWidget {
 
   void _showAssetContent(
       BuildContext context, String title, String assetPath) {
+    final c = GetzyColors.of(context);
     showDialog(
       context: context,
       builder: (context) {
@@ -68,8 +70,8 @@ class AboutScreen extends StatelessWidget {
                 child: SingleChildScrollView(
                   child: Text(
                     content,
-                    style: const TextStyle(
-                      color: GetzyColors.textSecondary,
+                    style: TextStyle(
+                      color: c.textSecondary,
                       fontSize: 16,
                       height: 1.5,
                     ),
@@ -105,6 +107,7 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final c = GetzyColors.of(context);
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon, size: 32),
@@ -119,8 +122,8 @@ class _InfoRow extends StatelessWidget {
         padding: const EdgeInsets.only(top: 6),
         child: Text(
           subtitle,
-          style: const TextStyle(
-            color: GetzyColors.textSecondary,
+          style: TextStyle(
+            color: c.textSecondary,
             fontSize: 16,
           ),
         ),

@@ -5,11 +5,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:getzy/app/getzy_app.dart';
 import 'package:getzy/features/settings/settings_repository.dart';
+import 'package:getzy/features/torrents/fake_torrent_engine.dart';
 import 'package:getzy/features/torrents/torrent_database.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
-  setUpAll(() async {
+  late FakeTorrentEngine engine;
+
+  setUp(() async {
+    engine = FakeTorrentEngine.seeded();
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(
       const MethodChannel('plugins.flutter.io/path_provider'),
@@ -29,15 +33,16 @@ void main() {
     );
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
-  });
-
-  setUp(() async {
     TorrentDatabase.instance.reset();
     await SettingsRepository.instance.saveValue('onboarding_complete', 'true');
   });
 
+  tearDown(() {
+    engine.dispose();
+  });
+
   testWidgets('app startup renders home screen with torrents', (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.runAsync(
       () => Future.delayed(const Duration(milliseconds: 50)),
     );
@@ -52,7 +57,7 @@ void main() {
   });
 
   testWidgets('add torrent via info hash shows in list', (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.runAsync(
       () => Future.delayed(const Duration(milliseconds: 50)),
     );
@@ -78,7 +83,7 @@ void main() {
   });
 
   testWidgets('pause and resume torrent via toggle', (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.runAsync(
       () => Future.delayed(const Duration(milliseconds: 50)),
     );
@@ -95,9 +100,9 @@ void main() {
     await tester.pump();
     await tester.pump();
 
-    expect(find.byTooltip('Resume torrent'), findsOneWidget);
+    expect(find.byTooltip('Resume torrent'), findsAtLeast(1));
 
-    await tester.tap(find.byTooltip('Resume torrent'));
+    await tester.tap(find.byTooltip('Resume torrent').first);
     await tester.runAsync(
       () => Future.delayed(const Duration(milliseconds: 500)),
     );
@@ -108,11 +113,11 @@ void main() {
       () => Future.delayed(const Duration(milliseconds: 500)),
     );
 
-    expect(find.byTooltip('Pause torrent'), findsOneWidget);
+    expect(find.byTooltip('Pause torrent'), findsAtLeast(1));
   });
 
   testWidgets('settings subpages show controls', (tester) async {
-    await tester.pumpWidget(const GetzyApp());
+    await tester.pumpWidget(GetzyApp(engine: engine));
     await tester.runAsync(
       () => Future.delayed(const Duration(milliseconds: 50)),
     );

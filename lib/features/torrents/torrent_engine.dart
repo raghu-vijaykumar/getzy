@@ -37,6 +37,7 @@ abstract class TorrentEngine extends ChangeNotifier {
   Future<void> deleteTorrent(String id);
   Future<void> triggerConstraintCheck();
   void handleNotificationAction(String action);
+  void setFilePriorities(String infoHash, List<TorrentFile> files);
 }
 
 abstract class TorrentEngineEvent {}
@@ -54,4 +55,10 @@ class TorrentTaskUpdated extends TorrentEngineEvent {
 class TorrentEngineErrorEvent extends TorrentEngineEvent {
   TorrentEngineErrorEvent(this.error);
   final String error;
+}
+
+class TorrentAwaitingFileSelection extends TorrentEngineEvent {
+  TorrentAwaitingFileSelection(this.infoHash, this.files);
+  final String infoHash;
+  final List<TorrentFile> files;
 }
